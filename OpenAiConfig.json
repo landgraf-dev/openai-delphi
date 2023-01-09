@@ -1,0 +1,9 @@
+{
+    "ClientName": "OpenAI",
+    "ServiceOptions": {
+        "SolvingMode": "MultipleClientsFromFirstTagAndOperationId",
+        "InterfaceGuids": {
+            "IOpenAIService": "{27B11300-4F11-4950-8B64-662C16C89F7B}"
+        }
+    }
+}

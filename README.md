@@ -1,6 +1,7 @@
 # OpenAI for Delphi and Lazarus/FPC.
 
 OpenAI for Delphi is a client library to connect to the [OpenAI API](https://openai.com/api/) from Delphi and Lazarus/FPC (Free Pascal Compiler). 
+From this library you can use popular OpenAI services, like [ChatGPT](https://openai.com/blog/chatgpt/), directly from your Delphi or Lazarus application.
 
 *This is an unofficial library. OpenAI does not provide any official library for Delphi.*
 

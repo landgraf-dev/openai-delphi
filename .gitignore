@@ -69,3 +69,7 @@ __recovery/
 modules/
 Demos/ChatGPT/ChatGPT.res
 generate-client.bat
+*.lps
+*.compiled
+*.ppu
+*.rsj

@@ -6,7 +6,7 @@ interface
 
 uses
 {$IFDEF FPC}
-  fpjson,
+  fpjson, jsonparser,
 {$ELSE}
   Generics.Collections,
   JSON,
@@ -300,7 +300,11 @@ end;
 
 function TJsonWrapper.JsonValueToJson(Value: TJSONValue): string;
 begin
+{$IFDEF FPC}
+  Result := Value.AsJSON;
+{$ELSE}
   Result := Value.ToString;
+{$ENDIF}
 end;
 
 procedure TJsonWrapper.ObjAddProp(JObj: TJSONValue; const Name: string; Value: TJSONValue);

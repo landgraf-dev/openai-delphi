@@ -31,9 +31,15 @@ var
 ```
 
 ### Integrating with whatsapp in Delphi
+Example of using openai-delphi with [WPP4Delphi](https://github.com/wppconnect-team/WPP4Delphi) in [WPPConnect-Team](https://github.com/wppconnect-team)
 
-[Movie DEMO in Whatsapp with Chat GPT](https://www.youtube.com/watch?v=zwA2KYIoxiM&t=2s&ab_channel=WPPConnect)<Br>
-[Component for integration with whatsapp](https://github.com/wppconnect-team/WPP4Delphi)
+Component Opensource for sending messages integrated into whatsapp web using Delphi
+
+Example:  [Demo View](https://www.youtube.com/watch?v=zwA2KYIoxiM&t=2s&ab_channel=WPPConnect)
+![image](https://user-images.githubusercontent.com/26030963/216602518-3a497347-6fb4-4c99-af61-92ffb3949993.png)
+
+
+Code Example in Delphi:
 ```
 if SwtChatGPT.IsOn then
 begin
@@ -52,6 +58,7 @@ begin
 end;
 end;
 ``` 
+Complete Code in [WPP4Delphi](https://github.com/wppconnect-team/WPP4Delphi)
 
 
 ### Executing methods

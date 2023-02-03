@@ -30,6 +30,37 @@ var
   Client.Config.AccessToken := GetEnvironmentVariable('OPENAI_API_KEY');
 ```
 
+### Integrating with whatsapp in Delphi
+Example of using openai-delphi with [WPP4Delphi](https://github.com/wppconnect-team/WPP4Delphi) in [WPPConnect-Team](https://github.com/wppconnect-team)
+
+Component Opensource for sending messages integrated into whatsapp web using Delphi
+
+Example:  [Demo View](https://www.youtube.com/watch?v=zwA2KYIoxiM&t=2s&ab_channel=WPPConnect)
+![image](https://user-images.githubusercontent.com/26030963/216602518-3a497347-6fb4-4c99-af61-92ffb3949993.png)
+
+
+Code Example in Delphi:
+```
+if SwtChatGPT.IsOn then
+begin
+if Question <> '' then
+begin
+	//Credits --> https://github.com/landgraf-dev/openai-delphi
+	Answer      := AskQuestion(Question, AChat.id);
+	phoneNumber := Copy(Answer, 1, pos('#', Answer)-1);
+	Answer      := StringReplace(Answer, phoneNumber + '#', '',[]);
+
+	if Trim(Answer) <> '' then
+	frDemo.TWPPConnect1.SendTextMessageEx(phoneNumber, '🤖' + ' *ChatGPT* ' + Answer, 'createChat: true', '123')
+	else
+	frDemo.TWPPConnect1.SendTextMessageEx(phoneNumber, '🤖' + ' *ChatGPT* ' + 'Could not retrieve an answer.', 'createChat: true', '123');
+
+end;
+end;
+``` 
+Complete Code in [WPP4Delphi](https://github.com/wppconnect-team/WPP4Delphi)
+
+
 ### Executing methods
 
 Most of [OpenAI API endpoints](https://beta.openai.com/docs/api-reference) are available in the client, under the interface provided in the `OpenAI` property. The following example shows how to ask a question and receive an answer using the CreateCompletion endpoint:

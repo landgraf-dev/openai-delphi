@@ -6,26 +6,68 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  Classes, SysUtils,
+  Classes, SysUtils, Generics.Collections,
   OpenAIClient,
   OpenAIDtos;
 
 const
   CApiKeyVar = 'OPENAI_API_KEY';
 
-var
-  Client: IOpenAIClient;
+type
+  TChatter = class abstract
+  strict private
+    FClient: IOpenAIClient;
+    function GetAPIKey: string;
+    function GetClient: IOpenAIClient;
+  strict protected
+    procedure WriteHeader; virtual;
+    function AskQuestion(const Question: string): string; virtual; abstract;
+  public
+    procedure Run; virtual;
+    procedure DoChat; virtual;
+    property Client: IOpenAIClient read GetClient;
+  end;
 
-procedure WriteHeader;
+  TChatter35 = class(TChatter)
+  strict protected
+    function AskQuestion(const Question: string): string; override;
+  end;
+
+  TChatter40 = class(TChatter)
+  strict private
+    FMessages: TObjectList<TChatCompletionRequestMessage>;
+    procedure AddMessage(const Role, Content: string);
+  strict protected
+    function AskQuestion(const Question: string): string; override;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure DoChat; override;
+  end;
+
+{ TChatter }
+
+procedure TChatter.DoChat;
+var
+  Question: string;
+  Answer: string;
 begin
-  WriteLn('OpenAI ChatGPT Sample Application version 1.0');
-  WriteLn('Using OpenAI API Client for Delphi and Lazarus/FPC');
-  WriteLn('https://github.com/landgraf.dev/openai-delphi');
-  WriteLn('Copyright (c) Landgraf.dev - all rights reserved.');
-  WriteLn('');
+  repeat
+    Write('Write your question: ');
+    ReadLn(Question);
+    if Question <> '' then
+    begin
+      Answer := AskQuestion(Question);
+      if Answer <> '' then
+        WriteLn('Answer: ' + Answer)
+      else
+        WriteLn('Could not retrieve an answer.');
+      WriteLn('');
+    end;
+  until Question = '';
 end;
 
-function GetAPIKey: string;
+function TChatter.GetAPIKey: string;
 begin
   Result := GetEnvironmentVariable(CApiKeyVar);
   if Result <> '' then
@@ -42,7 +84,36 @@ begin
   WriteLn('');
 end;
 
-function AskQuestion(const Question: string): string;
+function TChatter.GetClient: IOpenAIClient;
+begin
+  if FClient = nil then
+  begin
+    FClient := TOpenAIClient.Create;
+    FClient.Config.AccessToken := GetAPIKey;
+  end;
+  Result := FClient;
+end;
+
+procedure TChatter.Run;
+begin
+  WriteHeader;
+  Client; // init client
+  DoChat;
+  WriteLn('Goodbye.');
+end;
+
+procedure TChatter.WriteHeader;
+begin
+  WriteLn('OpenAI ChatGPT Sample Application version 1.0');
+  WriteLn('Using OpenAI API Client for Delphi and Lazarus/FPC');
+  WriteLn('https://github.com/landgraf.dev/openai-delphi');
+  WriteLn('Copyright (c) Landgraf.dev - all rights reserved.');
+  WriteLn('');
+end;
+
+{ TChatter35 }
+
+function TChatter35.AskQuestion(const Question: string): string;
 var
   Request: TCreateCompletionRequest;
   Response: TCreateCompletionResponse;
@@ -64,34 +135,80 @@ begin
   end;
 end;
 
-procedure Run;
-var
-  Question: string;
-  Answer: string;
-begin
-  WriteHeader;
-  Client := TOpenAIClient.Create;
-  Client.Config.AccessToken := GetAPIKey;
+{ TChatter40 }
 
-  repeat
-    Write('Write your question: ');
-    ReadLn(Question);
-    if Question <> '' then
-    begin
-      Answer := AskQuestion(Question);
-      if Answer <> '' then
-        WriteLn('Answer: ' + Answer)
-      else
-        WriteLn('Could not retrieve an answer.');
-      WriteLn('');
-    end;
-  until Question = '';
-  WriteLn('Goodbye.');
+procedure TChatter40.AddMessage(const Role, Content: string);
+var
+  Msg: TChatCompletionRequestMessage;
+begin
+  Msg := TChatCompletionRequestMessage.Create;
+  FMessages.Add(Msg);
+  Msg.Role := Role;
+  Msg.Content := Content;
 end;
 
+function TChatter40.AskQuestion(const Question: string): string;
+var
+  Request: TCreateChatCompletionRequest;
+  Response: TCreateChatCompletionResponse;
+  SourceMsg, TargetMsg: TChatCompletionRequestMessage;
+begin
+  Response := nil;
+  Request := TCreateChatCompletionRequest.Create;
+  try
+    AddMessage('user', Question);
+    Request.Model := 'gpt-3.5-turbo';
+    Request.MaxTokens := 2048; // Be careful as this can quickly consume your API quota.
+    for SourceMsg in FMessages do
+    begin
+      TargetMsg := TChatCompletionRequestMessage.Create;
+      Request.Messages.Add(TargetMsg);
+      TargetMsg.Role := SourceMsg.Role;
+      TargetMsg.Content := SourceMsg.Content;
+    end;
+
+    Response := Client.OpenAI.CreateChatCompletion(Request);
+    if Assigned(Response.Choices) and (Response.Choices.Count > 0) then
+    begin
+      Result := Response.Choices[0].Message.Content;
+      AddMessage('assistant', Result);
+    end
+    else
+      Result := '';
+  finally
+    Request.Free;
+    Response.Free;
+  end;
+end;
+
+constructor TChatter40.Create;
+begin
+  inherited Create;
+  FMessages := TObjectList<TChatCompletionRequestMessage>.Create;
+end;
+
+destructor TChatter40.Destroy;
+begin
+  FMessages.Free;
+  inherited;
+end;
+
+procedure TChatter40.DoChat;
+begin
+  AddMessage('system', 'You are a helpful assistant.');
+  inherited;
+end;
+
+var
+  Chatter: TChatter;
 begin
   try
-    Run;
+    Chatter := TChatter40.Create;
+    try
+      Chatter.Run;
+    finally
+      Chatter.Free;
+    end;
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);

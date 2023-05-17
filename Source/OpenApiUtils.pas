@@ -21,6 +21,7 @@ function DateTimeToISO(const Value: TDateTime): string;
 function DateToISO(const Value: TDate): string;
 function ISOToDateTime(const Value: string): TDateTime;
 function ISOToDate(const Value: string): TDate;
+function BoolToParam(const Value: Boolean): string;
 
 resourcestring
   SInvalidDateFormat = 'Value %s is not a valid datetime';
@@ -610,6 +611,14 @@ end;
 function ISOToDate(const Value: string): TDate;
 begin
   Result := InternalISOTODateTime(Value, zmAsLocal);
+end;
+
+function BoolToParam(const Value: Boolean): string;
+begin
+  if Value then
+    Result := 'true'
+  else
+    Result := 'false';
 end;
 
 end.

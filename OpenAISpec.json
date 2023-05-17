@@ -3,7 +3,7 @@
    "info": {
       "title": "OpenAI API",
       "description": "APIs for sampling from and fine-tuning language models",
-      "version": "1.1.0"
+      "version": "1.2.0"
    },
    "servers": [
       {
@@ -138,13 +138,57 @@
             }
          }
       },
+      "/chat/completions": {
+         "post": {
+            "operationId": "createChatCompletion",
+            "tags": [
+               "OpenAI"
+            ],
+            "summary": "Creates a completion for the chat message",
+            "requestBody": {
+               "required": true,
+               "content": {
+                  "application/json": {
+                     "schema": {
+                        "$ref": "#/components/schemas/CreateChatCompletionRequest"
+                     }
+                  }
+               }
+            },
+            "responses": {
+               "200": {
+                  "description": "OK",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/CreateChatCompletionResponse"
+                        }
+                     }
+                  }
+               }
+            },
+            "x-oaiMeta": {
+               "name": "Create chat completion",
+               "group": "chat",
+               "path": "create",
+               "beta": true,
+               "examples": {
+                  "curl": "curl https://api.openai.com/v1/chat/completions \\\n  -H 'Content-Type: application/json' \\\n  -H 'Authorization: Bearer YOUR_API_KEY' \\\n  -d '{\n  \"model\": \"gpt-3.5-turbo\",\n  \"messages\": [{\"role\": \"user\", \"content\": \"Hello!\"}]\n}'\n",
+                  "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\n\ncompletion = openai.ChatCompletion.create(\n  model=\"gpt-3.5-turbo\",\n  messages=[\n    {\"role\": \"user\", \"content\": \"Hello!\"}\n  ]\n)\n\nprint(completion.choices[0].message)\n",
+                  "node.js": "const { Configuration, OpenAIApi } = require(\"openai\");\n\nconst configuration = new Configuration({\n  apiKey: process.env.OPENAI_API_KEY,\n});\nconst openai = new OpenAIApi(configuration);\n\nconst completion = await openai.createChatCompletion({\n  model: \"gpt-3.5-turbo\",\n  messages: [{role: \"user\", content: \"Hello world\"}],\n});\nconsole.log(completion.data.choices[0].message);\n"
+               },
+               "parameters": "{\n  \"model\": \"gpt-3.5-turbo\",\n  \"messages\": [{\"role\": \"user\", \"content\": \"Hello!\"}]\n}\n",
+               "response": "{\n  \"id\": \"chatcmpl-123\",\n  \"object\": \"chat.completion\",\n  \"created\": 1677652288,\n  \"choices\": [{\n    \"index\": 0,\n    \"message\": {\n      \"role\": \"assistant\",\n      \"content\": \"\\n\\nHello there, how may I assist you today?\",\n    },\n    \"finish_reason\": \"stop\"\n  }],\n  \"usage\": {\n    \"prompt_tokens\": 9,\n    \"completion_tokens\": 12,\n    \"total_tokens\": 21\n  }\n}\n"
+            }
+         }
+      },
       "/edits": {
          "post": {
             "operationId": "createEdit",
             "tags": [
                "OpenAI"
             ],
-            "summary": "Creates a new edit for the provided input, instruction, and parameters",
+            "summary": "Creates a new edit for the provided input, instruction, and parameters.",
             "requestBody": {
                "required": true,
                "content": {
@@ -214,6 +258,7 @@
                "name": "Create image",
                "group": "images",
                "path": "create",
+               "beta": true,
                "examples": {
                   "curl": "curl https://api.openai.com/v1/images/generations \\\n  -H 'Content-Type: application/json' \\\n  -H 'Authorization: Bearer YOUR_API_KEY' \\\n  -d '{\n  \"prompt\": \"A cute baby sea otter\",\n  \"n\": 2,\n  \"size\": \"1024x1024\"\n}'\n",
                   "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.Image.create(\n  prompt=\"A cute baby sea otter\",\n  n=2,\n  size=\"1024x1024\"\n)\n",
@@ -257,6 +302,7 @@
                "name": "Create image edit",
                "group": "images",
                "path": "create-edit",
+               "beta": true,
                "examples": {
                   "curl": "curl https://api.openai.com/v1/images/edits \\\n  -H 'Authorization: Bearer YOUR_API_KEY' \\\n  -F image='@otter.png' \\\n  -F mask='@mask.png' \\\n  -F prompt=\"A cute baby sea otter wearing a beret\" \\\n  -F n=2 \\\n  -F size=\"1024x1024\"\n",
                   "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.Image.create_edit(\n  image=open(\"otter.png\", \"rb\"),\n  mask=open(\"mask.png\", \"rb\"),\n  prompt=\"A cute baby sea otter wearing a beret\",\n  n=2,\n  size=\"1024x1024\"\n)\n",
@@ -299,6 +345,7 @@
                "name": "Create image variation",
                "group": "images",
                "path": "create-variation",
+               "beta": true,
                "examples": {
                   "curl": "curl https://api.openai.com/v1/images/variations \\\n  -H 'Authorization: Bearer YOUR_API_KEY' \\\n  -F image='@otter.png' \\\n  -F n=2 \\\n  -F size=\"1024x1024\"\n",
                   "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.Image.create_variation(\n  image=open(\"otter.png\", \"rb\"),\n  n=2,\n  size=\"1024x1024\"\n)\n",
@@ -347,7 +394,95 @@
                   "node.js": "const { Configuration, OpenAIApi } = require(\"openai\");\nconst configuration = new Configuration({\n  apiKey: process.env.OPENAI_API_KEY,\n});\nconst openai = new OpenAIApi(configuration);\nconst response = await openai.createEmbedding({\n  model: \"text-embedding-ada-002\",\n  input: \"The food was delicious and the waiter...\",\n});\n"
                },
                "parameters": "{\n  \"model\": \"text-embedding-ada-002\",\n  \"input\": \"The food was delicious and the waiter...\"\n}\n",
-               "response": "{\n  \"object\": \"list\",\n  \"data\": [\n    {\n      \"object\": \"embedding\",\n      \"embedding\": [\n        0.0023064255,\n        -0.009327292,\n        .... (1056 floats total for ada)\n        -0.0028842222,\n      ],\n      \"index\": 0\n    }\n  ],\n  \"model\": \"text-embedding-ada-002\",\n  \"usage\": {\n    \"prompt_tokens\": 8,\n    \"total_tokens\": 8\n  }\n}\n"
+               "response": "{\n  \"object\": \"list\",\n  \"data\": [\n    {\n      \"object\": \"embedding\",\n      \"embedding\": [\n        0.0023064255,\n        -0.009327292,\n        .... (1536 floats total for ada-002)\n        -0.0028842222,\n      ],\n      \"index\": 0\n    }\n  ],\n  \"model\": \"text-embedding-ada-002\",\n  \"usage\": {\n    \"prompt_tokens\": 8,\n    \"total_tokens\": 8\n  }\n}\n"
+            }
+         }
+      },
+      "/audio/transcriptions": {
+         "post": {
+            "operationId": "createTranscription",
+            "tags": [
+               "OpenAI"
+            ],
+            "summary": "Transcribes audio into the input language.",
+            "requestBody": {
+               "required": true,
+               "content": {
+                  "multipart/form-data": {
+                     "schema": {
+                        "$ref": "#/components/schemas/CreateTranscriptionRequest"
+                     }
+                  }
+               }
+            },
+            "responses": {
+               "200": {
+                  "description": "OK",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/CreateTranscriptionResponse"
+                        }
+                     }
+                  }
+               }
+            },
+            "x-oaiMeta": {
+               "name": "Create transcription",
+               "group": "audio",
+               "path": "create",
+               "beta": true,
+               "examples": {
+                  "curl": "curl https://api.openai.com/v1/audio/transcriptions \\\n  -X POST \\\n  -H 'Authorization: Bearer TOKEN' \\\n  -H 'Content-Type: multipart/form-data' \\\n  -F file=@/path/to/file/audio.mp3 \\\n  -F model=whisper-1\n",
+                  "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\naudio_file = open(\"audio.mp3\", \"rb\")\ntranscript = openai.Audio.transcribe(\"whisper-1\", audio_file)\n",
+                  "node": "const { Configuration, OpenAIApi } = require(\"openai\");\nconst configuration = new Configuration({\n  apiKey: process.env.OPENAI_API_KEY,\n});\nconst openai = new OpenAIApi(configuration);\nconst resp = await openai.createTranscription(\n  fs.createReadStream(\"audio.mp3\"),\n  \"whisper-1\"\n);\n"
+               },
+               "parameters": "{\n  \"file\": \"audio.mp3\",\n  \"model\": \"whisper-1\"\n}\n",
+               "response": "{\n  \"text\": \"Imagine the wildest idea that you've ever had, and you're curious about how it might scale to something that's a 100, a 1,000 times bigger. This is a place where you can get to do that.\"\n}\n"
+            }
+         }
+      },
+      "/audio/translations": {
+         "post": {
+            "operationId": "createTranslation",
+            "tags": [
+               "OpenAI"
+            ],
+            "summary": "Translates audio into into English.",
+            "requestBody": {
+               "required": true,
+               "content": {
+                  "multipart/form-data": {
+                     "schema": {
+                        "$ref": "#/components/schemas/CreateTranslationRequest"
+                     }
+                  }
+               }
+            },
+            "responses": {
+               "200": {
+                  "description": "OK",
+                  "content": {
+                     "application/json": {
+                        "schema": {
+                           "$ref": "#/components/schemas/CreateTranslationResponse"
+                        }
+                     }
+                  }
+               }
+            },
+            "x-oaiMeta": {
+               "name": "Create translation",
+               "group": "audio",
+               "path": "create",
+               "beta": true,
+               "examples": {
+                  "curl": "curl https://api.openai.com/v1/audio/translations \\\n    -X POST \\\n    -H 'Authorization: Bearer TOKEN' \\\n    -H 'Content-Type: multipart/form-data' \\\n    -F file=@/path/to/file/german.m4a \\\n    -F model=whisper-1\n",
+                  "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\naudio_file = open(\"german.m4a\", \"rb\")\ntranscript = openai.Audio.translate(\"whisper-1\", audio_file)\n",
+                  "node": "const { Configuration, OpenAIApi } = require(\"openai\");\nconst configuration = new Configuration({\n  apiKey: process.env.OPENAI_API_KEY,\n});\nconst openai = new OpenAIApi(configuration);\nconst resp = await openai.createTranslation(\n  fs.createReadStream(\"audio.mp3\"),\n  \"whisper-1\"\n);\n"
+               },
+               "parameters": "{\n  \"file\": \"german.m4a\",\n  \"model\": \"whisper-1\"\n}\n",
+               "response": "{\n  \"text\": \"Hello, my name is Wolfgang and I come from Germany. Where are you heading today?\"\n}\n"
             }
          }
       },
@@ -726,7 +861,6 @@
                "name": "Create fine-tune",
                "group": "fine-tunes",
                "path": "create",
-               "beta": true,
                "examples": {
                   "curl": "curl https://api.openai.com/v1/fine-tunes \\\n  -X POST \\\n  -H \"Content-Type: application/json\" \\\n  -H \"Authorization: Bearer YOUR_API_KEY\" \\\n  -d '{\n  \"training_file\": \"file-XGinujblHPwGLSztz8cPS8XY\"\n}'\n",
                   "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.FineTune.create(training_file=\"file-XGinujblHPwGLSztz8cPS8XY\")\n",
@@ -757,7 +891,6 @@
                "name": "List fine-tunes",
                "group": "fine-tunes",
                "path": "list",
-               "beta": true,
                "examples": {
                   "curl": "curl https://api.openai.com/v1/fine-tunes \\\n  -H 'Authorization: Bearer YOUR_API_KEY'\n",
                   "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.FineTune.list()\n",
@@ -802,7 +935,6 @@
                "name": "Retrieve fine-tune",
                "group": "fine-tunes",
                "path": "retrieve",
-               "beta": true,
                "examples": {
                   "curl": "curl https://api.openai.com/v1/fine-tunes/ft-AF1WoRqd3aJAHsqc9NY7iL8F \\\n  -H \"Authorization: Bearer YOUR_API_KEY\"\n",
                   "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.FineTune.retrieve(id=\"ft-AF1WoRqd3aJAHsqc9NY7iL8F\")\n",
@@ -847,7 +979,6 @@
                "name": "Cancel fine-tune",
                "group": "fine-tunes",
                "path": "cancel",
-               "beta": true,
                "examples": {
                   "curl": "curl https://api.openai.com/v1/fine-tunes/ft-AF1WoRqd3aJAHsqc9NY7iL8F/cancel \\\n  -X POST \\\n  -H \"Authorization: Bearer YOUR_API_KEY\"\n",
                   "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.FineTune.cancel(id=\"ft-AF1WoRqd3aJAHsqc9NY7iL8F\")\n",
@@ -902,7 +1033,6 @@
                "name": "List fine-tune events",
                "group": "fine-tunes",
                "path": "events",
-               "beta": true,
                "examples": {
                   "curl": "curl https://api.openai.com/v1/fine-tunes/ft-AF1WoRqd3aJAHsqc9NY7iL8F/events \\\n  -H \"Authorization: Bearer YOUR_API_KEY\"\n",
                   "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.FineTune.list_events(id=\"ft-AF1WoRqd3aJAHsqc9NY7iL8F\")\n",
@@ -1021,7 +1151,6 @@
                "name": "Delete fine-tune model",
                "group": "fine-tunes",
                "path": "delete-model",
-               "beta": true,
                "examples": {
                   "curl": "curl https://api.openai.com/v1/models/curie:ft-acmeco-2021-03-03-21-44-20 \\\n  -X DELETE \\\n  -H \"Authorization: Bearer YOUR_API_KEY\"\n",
                   "python": "import os\nimport openai\nopenai.api_key = os.getenv(\"OPENAI_API_KEY\")\nopenai.Model.delete(\"curie:ft-acmeco-2021-03-03-21-44-20\")\n",
@@ -1201,7 +1330,7 @@
                   "default": 1,
                   "example": 1,
                   "nullable": true,
-                  "description": "What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.\n\nWe generally recommend altering this or `top_p` but not both.\n"
+                  "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.\n\nWe generally recommend altering this or `top_p` but not both.\n"
                },
                "top_p": {
                   "type": "number",
@@ -1394,11 +1523,224 @@
                "choices"
             ]
          },
+         "ChatCompletionRequestMessage": {
+            "type": "object",
+            "properties": {
+               "role": {
+                  "type": "string",
+                  "enum": [
+                     "system",
+                     "user",
+                     "assistant"
+                  ],
+                  "description": "The role of the author of this message."
+               },
+               "content": {
+                  "type": "string",
+                  "description": "The contents of the message"
+               },
+               "name": {
+                  "type": "string",
+                  "description": "The name of the user in a multi-user chat"
+               }
+            },
+            "required": [
+               "role",
+               "content"
+            ]
+         },
+         "ChatCompletionResponseMessage": {
+            "type": "object",
+            "properties": {
+               "role": {
+                  "type": "string",
+                  "enum": [
+                     "system",
+                     "user",
+                     "assistant"
+                  ],
+                  "description": "The role of the author of this message."
+               },
+               "content": {
+                  "type": "string",
+                  "description": "The contents of the message"
+               }
+            },
+            "required": [
+               "role",
+               "content"
+            ]
+         },
+         "CreateChatCompletionRequest": {
+            "type": "object",
+            "properties": {
+               "model": {
+                  "description": "ID of the model to use. Currently, only `gpt-3.5-turbo` and `gpt-3.5-turbo-0301` are supported.",
+                  "type": "string"
+               },
+               "messages": {
+                  "description": "The messages to generate chat completions for, in the [chat format](/docs/guides/chat/introduction).",
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                     "$ref": "#/components/schemas/ChatCompletionRequestMessage"
+                  }
+               },
+               "temperature": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "default": 1,
+                  "example": 1,
+                  "nullable": true,
+                  "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.\n\nWe generally recommend altering this or `top_p` but not both.\n"
+               },
+               "top_p": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "default": 1,
+                  "example": 1,
+                  "nullable": true,
+                  "description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.\n\nWe generally recommend altering this or `temperature` but not both.\n"
+               },
+               "n": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 128,
+                  "default": 1,
+                  "example": 1,
+                  "nullable": true,
+                  "description": "How many chat completion choices to generate for each input message."
+               },
+               "stream": {
+                  "description": "If set, partial message deltas will be sent, like in ChatGPT. Tokens will be sent as data-only [server-sent events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format) as they become available, with the stream terminated by a `data: [DONE]` message.\n",
+                  "type": "boolean",
+                  "nullable": true,
+                  "default": false
+               },
+               "stop": {
+                  "description": "Up to 4 sequences where the API will stop generating further tokens.\n",
+                  "default": null,
+                  "oneOf": [
+                     {
+                        "type": "string",
+                        "nullable": true
+                     },
+                     {
+                        "type": "array",
+                        "minItems": 1,
+                        "maxItems": 4,
+                        "items": {
+                           "type": "string"
+                        }
+                     }
+                  ]
+               },
+               "max_tokens": {
+                  "description": "The maximum number of tokens allowed for the generated answer. By default, the number of tokens the model can return will be (4096 - prompt tokens).\n",
+                  "default": "inf",
+                  "type": "integer"
+               },
+               "presence_penalty": {
+                  "type": "number",
+                  "default": 0,
+                  "minimum": -2,
+                  "maximum": 2,
+                  "nullable": true,
+                  "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.\n\n[See more information about frequency and presence penalties.](/docs/api-reference/parameter-details)\n"
+               },
+               "frequency_penalty": {
+                  "type": "number",
+                  "default": 0,
+                  "minimum": -2,
+                  "maximum": 2,
+                  "nullable": true,
+                  "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.\n\n[See more information about frequency and presence penalties.](/docs/api-reference/parameter-details)\n"
+               },
+               "logit_bias": {
+                  "type": "object",
+                  "x-oaiTypeLabel": "map",
+                  "default": null,
+                  "nullable": true,
+                  "description": "Modify the likelihood of specified tokens appearing in the completion.\n\nAccepts a json object that maps tokens (specified by their token ID in the tokenizer) to an associated bias value from -100 to 100. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.\n"
+               },
+               "user": {
+                  "type": "string",
+                  "example": "user-1234",
+                  "description": "A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. [Learn more](/docs/guides/safety-best-practices/end-user-ids).\n"
+               }
+            },
+            "required": [
+               "model",
+               "messages"
+            ]
+         },
+         "CreateChatCompletionResponse": {
+            "type": "object",
+            "properties": {
+               "id": {
+                  "type": "string"
+               },
+               "object": {
+                  "type": "string"
+               },
+               "created": {
+                  "type": "integer"
+               },
+               "model": {
+                  "type": "string"
+               },
+               "choices": {
+                  "type": "array",
+                  "items": {
+                     "type": "object",
+                     "properties": {
+                        "index": {
+                           "type": "integer"
+                        },
+                        "message": {
+                           "$ref": "#/components/schemas/ChatCompletionResponseMessage"
+                        },
+                        "finish_reason": {
+                           "type": "string"
+                        }
+                     }
+                  }
+               },
+               "usage": {
+                  "type": "object",
+                  "properties": {
+                     "prompt_tokens": {
+                        "type": "integer"
+                     },
+                     "completion_tokens": {
+                        "type": "integer"
+                     },
+                     "total_tokens": {
+                        "type": "integer"
+                     }
+                  },
+                  "required": [
+                     "prompt_tokens",
+                     "completion_tokens",
+                     "total_tokens"
+                  ]
+               }
+            },
+            "required": [
+               "id",
+               "object",
+               "created",
+               "model",
+               "choices"
+            ]
+         },
          "CreateEditRequest": {
             "type": "object",
             "properties": {
                "model": {
-                  "description": "ID of the model to use. You can use the [List models](/docs/api-reference/models/list) API to see all of your available models, or see our [Model overview](/docs/models/overview) for descriptions of them.",
+                  "description": "ID of the model to use. You can use the `text-davinci-edit-001` or `code-davinci-edit-001` model with this endpoint.",
                   "type": "string"
                },
                "input": {
@@ -1429,7 +1771,7 @@
                   "default": 1,
                   "example": 1,
                   "nullable": true,
-                  "description": "What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.\n\nWe generally recommend altering this or `top_p` but not both.\n"
+                  "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.\n\nWe generally recommend altering this or `top_p` but not both.\n"
                },
                "top_p": {
                   "type": "number",
@@ -1449,17 +1791,11 @@
          "CreateEditResponse": {
             "type": "object",
             "properties": {
-               "id": {
-                  "type": "string"
-               },
                "object": {
                   "type": "string"
                },
                "created": {
                   "type": "integer"
-               },
-               "model": {
-                  "type": "string"
                },
                "choices": {
                   "type": "array",
@@ -1529,10 +1865,8 @@
                }
             },
             "required": [
-               "id",
                "object",
                "created",
-               "model",
                "choices",
                "usage"
             ]
@@ -2053,7 +2387,7 @@
                   "nullable": true
                },
                "temperature": {
-                  "description": "What [sampling temperature](https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277) to use. Higher values mean the model will take more risks and value 0 (argmax sampling) works better for scenarios with a well-defined answer.",
+                  "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.",
                   "type": "number",
                   "default": 0,
                   "nullable": true
@@ -2235,7 +2569,7 @@
                   "nullable": true
                },
                "temperature": {
-                  "description": "What sampling `temperature` to use. Higher values mean the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.",
+                  "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.",
                   "type": "number",
                   "minimum": 0,
                   "maximum": 2,
@@ -2346,7 +2680,7 @@
                   "example": "file-XjSREls59WBbvgSzJSVWxMCa"
                },
                "model": {
-                  "description": "The name of the base model to fine-tune. You can select one of \"ada\",\n\"babbage\", \"curie\", \"davinci\", or a fine-tuned model created after 2022-04-21.\nTo learn more about these models, see the\n[Models](https://beta.openai.com/docs/models) documentation.\n",
+                  "description": "The name of the base model to fine-tune. You can select one of \"ada\",\n\"babbage\", \"curie\", \"davinci\", or a fine-tuned model created after 2022-04-21.\nTo learn more about these models, see the\n[Models](https://platform.openai.com/docs/models) documentation.\n",
                   "default": "curie",
                   "type": "string",
                   "nullable": true
@@ -2572,6 +2906,98 @@
                "usage"
             ]
          },
+         "CreateTranscriptionRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+               "file": {
+                  "description": "The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.\n",
+                  "type": "string",
+                  "format": "binary"
+               },
+               "model": {
+                  "description": "ID of the model to use. Only `whisper-1` is currently available.\n",
+                  "type": "string"
+               },
+               "prompt": {
+                  "description": "An optional text to guide the model's style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should match the audio language.\n",
+                  "type": "string"
+               },
+               "response_format": {
+                  "description": "The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.\n",
+                  "type": "string",
+                  "default": "json"
+               },
+               "temperature": {
+                  "description": "The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.\n",
+                  "type": "number",
+                  "default": 0
+               },
+               "language": {
+                  "description": "The language of the input audio. Supplying the input language in [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes) format will improve accuracy and latency.\n",
+                  "type": "string"
+               }
+            },
+            "required": [
+               "file",
+               "model"
+            ]
+         },
+         "CreateTranscriptionResponse": {
+            "type": "object",
+            "properties": {
+               "text": {
+                  "type": "string"
+               }
+            },
+            "required": [
+               "text"
+            ]
+         },
+         "CreateTranslationRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+               "file": {
+                  "description": "The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.\n",
+                  "type": "string",
+                  "format": "binary"
+               },
+               "model": {
+                  "description": "ID of the model to use. Only `whisper-1` is currently available.\n",
+                  "type": "string"
+               },
+               "prompt": {
+                  "description": "An optional text to guide the model's style or continue a previous audio segment. The [prompt](/docs/guides/speech-to-text/prompting) should be in English.\n",
+                  "type": "string"
+               },
+               "response_format": {
+                  "description": "The format of the transcript output, in one of these options: json, text, srt, verbose_json, or vtt.\n",
+                  "type": "string",
+                  "default": "json"
+               },
+               "temperature": {
+                  "description": "The sampling temperature, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. If set to 0, the model will use [log probability](https://en.wikipedia.org/wiki/Log_probability) to automatically increase the temperature until certain thresholds are hit.\n",
+                  "type": "number",
+                  "default": 0
+               }
+            },
+            "required": [
+               "file",
+               "model"
+            ]
+         },
+         "CreateTranslationResponse": {
+            "type": "object",
+            "properties": {
+               "text": {
+                  "type": "string"
+               }
+            },
+            "required": [
+               "text"
+            ]
+         },
          "Engine": {
             "title": "Engine",
             "properties": {
@@ -2766,6 +3192,11 @@
             "description": "Given a prompt, the model will return one or more predicted completions, and can also return the probabilities of alternative tokens at each position.\n"
          },
          {
+            "id": "chat",
+            "title": "Chat",
+            "description": "Given a chat conversation, the model will return a chat completion response.\n"
+         },
+         {
             "id": "edits",
             "title": "Edits",
             "description": "Given a prompt and an instruction, the model will return an edited version of the prompt.\n"
@@ -2779,6 +3210,11 @@
             "id": "embeddings",
             "title": "Embeddings",
             "description": "Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.\n\nRelated guide: [Embeddings](/docs/guides/embeddings)\n"
+         },
+         {
+            "id": "audio",
+            "title": "Audio",
+            "description": "Learn how to turn audio into text.\n\nRelated guide: [Speech to text](/docs/guides/speech-to-text)\n"
          },
          {
             "id": "files",

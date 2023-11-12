@@ -1,5 +1,9 @@
 unit OpenApiIndy;
 
+{$IF CompilerVersion < 29}
+  {$DEFINE USEINDY}
+{$IFEND}
+
 interface
 
 uses
@@ -127,5 +131,10 @@ function TIndyRestResponse.ContentAsString: string;
 begin
   Result := TEncoding.UTF8.GetString(ContentAsBytes);
 end;
+
+{$IFDEF USEINDY}
+initialization
+  DefaultRequestFactory := TIndyRestRequestFactory.Create;;
+{$ENDIF}
 
 end.

@@ -73,7 +73,14 @@ begin
     if Assigned(FOnClientCreated) then
       FOnClientCreated(Client);
 
+  // gds 11/2023
+  // Compile for Indy > 10.5
+  {$IFDEF INDY100}
+    {$IFNDEF 10_5_8}
     Client.HTTPOptions := Client.HTTPOptions + [hoNoProtocolErrorException, hoWantProtocolErrorContent];
+    {$ENDIF}
+
+  {$ENDIF}
     RequestBody := nil;
     if Body <> '' then
       RequestBody := TStringStream.Create(Body, TEncoding.UTF8, False);

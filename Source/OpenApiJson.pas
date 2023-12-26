@@ -5,7 +5,7 @@ unit OpenApiJson;
 {$ELSE}
   {$IF CompilerVersion < 28}
     {$DEFINE USEDBX}
-  {$ENDIF}
+  {$IFEND}
 {$ENDIF}
 
 

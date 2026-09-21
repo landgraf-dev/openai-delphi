@@ -1,0 +1,41 @@
+object AITestForm: TAITestForm
+  Left = 392
+  Height = 452
+  Top = 168
+  Width = 593
+  Caption = 'AI Test'
+  ClientHeight = 452
+  ClientWidth = 593
+  LCLVersion = '4.6.0.0'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object Memo1: TMemo
+    Left = 0
+    Height = 304
+    Top = 0
+    Width = 592
+    Lines.Strings = (
+      'Memo1'
+    )
+    ReadOnly = True
+    ScrollBars = ssAutoBoth
+    TabOrder = 0
+  end
+  object Edit1: TEdit
+    Left = 8
+    Height = 26
+    Top = 312
+    Width = 576
+    TabOrder = 1
+    Text = 'Edit1'
+  end
+  object Button1: TButton
+    Left = 72
+    Height = 25
+    Top = 352
+    Width = 75
+    Caption = 'Button1'
+    TabOrder = 2
+    OnClick = Button1Click
+  end
+end

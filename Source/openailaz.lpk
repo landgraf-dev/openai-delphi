@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="5">
+    <Name Value="OpenAILaz"/>
+    <Type Value="RunTimeOnly"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)/"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Version Minor="1"/>
+    <Files>
+      <Item>
+        <Filename Value="OpenAIClient.pas"/>
+        <UnitName Value="OpenAIClient"/>
+      </Item>
+      <Item>
+        <Filename Value="OpenAIDtos.pas"/>
+        <UnitName Value="OpenAIDtos"/>
+      </Item>
+      <Item>
+        <Filename Value="OpenAIJson.pas"/>
+        <UnitName Value="OpenAIJson"/>
+      </Item>
+      <Item>
+        <Filename Value="OpenApiFpc.pas"/>
+        <UnitName Value="OpenApiFpc"/>
+      </Item>
+      <Item>
+        <Filename Value="OpenApiJson.pas"/>
+        <UnitName Value="OpenApiJson"/>
+      </Item>
+      <Item>
+        <Filename Value="OpenApiRest.pas"/>
+        <UnitName Value="OpenApiRest"/>
+      </Item>
+      <Item>
+        <Filename Value="OpenApiUtils.pas"/>
+        <UnitName Value="OpenApiUtils"/>
+      </Item>
+    </Files>
+    <RequiredPkgs>
+      <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
